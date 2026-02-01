@@ -11,8 +11,17 @@
 
 
 
+typedef struct Headers{
+    char key[40];
+    char value[40];
 
-typedef struct {
+}Headers_t;
+
+
+
+
+
+typedef struct ChunkReader{
         const char *data;
         int numBytesPerRead;
         int pos;
@@ -22,12 +31,13 @@ typedef struct {
 typedef enum {
 
     INITIALIZED,
+    requestStateParsingHeaders,
     DONE
 
 }state;
 
 
-typedef struct {
+typedef struct RequestLine{
     char HttpVersion[30];
     char RequestTarget[30];
     char Method[30]; 
@@ -35,6 +45,8 @@ typedef struct {
 
 typedef struct {
     RequestLine_t RequestLine;
+    Headers_t Headers[8];
+    int num_headers;
     state state;
 }Request_t;
 
@@ -46,11 +58,20 @@ Request_t* RequestFromReader(ChunkReader_t *cr);
 int parse(Request_t *req, char *data, int len);
 
 
+int Parse(Request_t *req, int index, char *data);
 
-typedef struct {
+
+
+typedef struct ChunkReader{
         const char *data;
         int numBytesPerRead;
         int pos;
 }ChunkReader_t;
+
+
+
+
+
+
 
 #endif

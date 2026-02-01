@@ -1,5 +1,5 @@
 # HTTP FROM TCP
- Http server built in C from tcp level —— socket management, handles reqeusts, routes traffic , serves responses.
+ Http server built in C from tcp level —— socket management, handles reqeusts, routes traffic, serves responses.
 
 
 # Features

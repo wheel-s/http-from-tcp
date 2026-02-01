@@ -1,3 +1,4 @@
+#include "../../include/request.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <winsock2.h>
@@ -6,7 +7,6 @@
 
 
 int main(){
-
     
     WSADATA wsa;
     SOCKET server_socket, client_socket;
@@ -26,7 +26,7 @@ int main(){
     bind(server_socket, (struct sockaddr *)&server, sizeof(server));
 
     listen(server_socket, 5);
-    printf("Waiting for incomint connections.....\n");
+    printf("Waiting for in coming connections.....\n");
 
     while(1){
         c = sizeof(struct sockaddr_in);
@@ -35,6 +35,19 @@ int main(){
         int bytes_recieved = recv(client_socket, buf, sizeof(buf)-1, 0);
         buf[bytes_recieved] ='\0';
 
+        
+        ChunkReader_t cr ={
+            .data =buf,
+            .pos=0,
+            .numBytesPerRead=5
+        };
+
+       
+    Request_t *r6 = RequestFromReader(&cr);
+       
+    printf("%s\n", r6->Headers[1].value);
+       
+     
         printf("Connection accepted! \n");
     
         char *msg = 
@@ -51,3 +64,4 @@ int main(){
     return 0;
 }
 
+//gcc -Irequest cmd/tcp/main.c internal/request/request.c -o app -lws2_32 
