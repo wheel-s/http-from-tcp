@@ -1,3 +1,4 @@
-- Method: GET
+Headers:
+- Method: POST
 - Target: /
 - Version: 1.1

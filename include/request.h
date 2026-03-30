@@ -12,8 +12,8 @@
 
 
 typedef struct Headers{
-    char key[40];
-    char value[40];
+    char key[256];
+    char value[256];
 
 }Headers_t;
 
@@ -32,6 +32,7 @@ typedef enum {
 
     INITIALIZED,
     requestStateParsingHeaders,
+    parsingbody,
     DONE
 
 }state;
@@ -45,7 +46,8 @@ typedef struct RequestLine{
 
 typedef struct {
     RequestLine_t RequestLine;
-    Headers_t Headers[8];
+    Headers_t Headers[10];
+    void *body;
     int num_headers;
     state state;
 }Request_t;
@@ -59,7 +61,7 @@ int parse(Request_t *req, char *data, int len);
 
 
 int Parse(Request_t *req, int index, char *data);
-
+char * Get(Request_t *req, char *string);
 
 
 typedef struct ChunkReader{

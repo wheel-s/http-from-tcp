@@ -49,12 +49,13 @@ int Parse(Request_t *req,int index, char *data ){
     int idx = index + 1;
     for(int i=0; i<idx; i++){
         if(strcmp(req->Headers[i].key, MainKey) ==0 ){
-         
+      
             update = i;
             break;
         }
     }
  
+    
      
     if( update != -1){
         strcat(req->Headers[update].value, value);  

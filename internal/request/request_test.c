@@ -8,28 +8,28 @@
 
 int main(){
 
-//     /* 
-//         Parsing request line
-//     */
+    /* 
+        Parsing request line
+    */
 
-//     // Good Request Line
-//     ChunkReader_t cr ={
-//         .data ="GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/8.16.0\r\n\r\n",
-//         .pos=0,
-//         .numBytesPerRead=5
-//     };
+    // Good Request Line
+    // ChunkReader_t cr ={
+    //     .data ="GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/8.16.0\r\n\r\n",
+    //     .pos=0,
+    //     .numBytesPerRead=5
+    // };
 
-//     Request_t *r1 = RequestFromReader(&cr);
+    // Request_t *r1 = RequestFromReader(&cr);
 
-//     assert(strcmp("GET",r1->RequestLine.Method )==0);
-//     assert(strcmp("/",r1->RequestLine.RequestTarget )==0);
-//     assert(strcmp("1.1",r1->RequestLine.HttpVersion)==0);
-//     char write[100];
-//     sprintf(write,  "- Method: %s\n- Target: %s\n- Version: %s\n",r1->RequestLine.Method,r1->RequestLine.RequestTarget, r1->RequestLine.HttpVersion);
-//     printf(write);
-//     FILE *file =fopen("requestline.txt", "w");
-//     fwrite(write, 1,strlen(write), file);
-//     fclose(file);
+    // assert(strcmp("GET",r1->RequestLine.Method )==0);
+    // assert(strcmp("/",r1->RequestLine.RequestTarget )==0);
+    // assert(strcmp("1.1",r1->RequestLine.HttpVersion)==0);
+    // char write[100];
+    // sprintf(write,  "- Method: %s\n- Target: %s\n- Version: %s\n",r1->RequestLine.Method,r1->RequestLine.RequestTarget, r1->RequestLine.HttpVersion);
+    // printf(write);
+    // FILE *file =fopen("requestline.txt", "w");
+    // fwrite(write, 1,strlen(write), file);
+    // fclose(file);
 
    
 //     // Good Request line with path
@@ -97,18 +97,18 @@ int main(){
 
 
 // Empty Headers
-    ChunkReader_t cr6 ={
-        .data ="GET /coffee HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/8.16.0\r\nAccept: */*\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n'{flavor:dark mode}'\r\n",
-        .pos=0,
-        .numBytesPerRead=5
-    };
+    // ChunkReader_t cr6 ={
+    //     .data ="GET /coffee HTTP/1.1\r\nHost: localhost: 8080\r\nUser-Agent: curl/8.16.0\r\nAccept: */*\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n'{flavor:light mode}'\r\n",
+    //     .pos=0,
+    //     .numBytesPerRead=5
+    // };
   
-    Request_t *r6 = RequestFromReader(&cr6);
+    // Request_t *r6 = RequestFromReader(&cr6);
        
-    printf("%s\n%s\n", r6->Headers[3].key, r6->Headers[3].value);
-    assert(strcmp("host", r6->Headers[0].key )==0);
-    assert(strcmp("/coffee",r6->RequestLine.RequestTarget )==0);
-    assert(strcmp("1.1",r6->RequestLine.HttpVersion)==0);
+    // printf("%s\n%s\n", r6->Headers[2].key, r6->Headers[2].value);
+    // assert(strcmp("host", r6->Headers[0].key )==0);
+    // assert(strcmp("/coffee",r6->RequestLine.RequestTarget )==0);
+    // assert(strcmp("1.1",r6->RequestLine.HttpVersion)==0);
 
     
 
@@ -120,6 +120,31 @@ Case insensitive Heeaders
 Missing End of Headers
 
 */
+
+
+
+
+
+
+
+
+//Test body
+
+    ChunkReader_t cr6 ={
+        .data ="GET /coffee HTTP/1.1\r\nHost: localhost: 8080\r\nUser-Agent: curl/8.16.0\r\nAccept: */*\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n'{flavor:light mode, name:wheel-s}'\r\n",
+        .pos=0,
+        .numBytesPerRead=5
+    };
+  
+    Request_t *r6 = RequestFromReader(&cr6);
+       
+    printf("%s", (char*)r6->body);
+    assert(strcmp("host", r6->Headers[0].key )==0);
+    assert(strcmp("/coffee",r6->RequestLine.RequestTarget )==0);
+    assert(strcmp("1.1",r6->RequestLine.HttpVersion)==0);
+
+    
+// other testcases like cchecking content-length or ......
 
 
 

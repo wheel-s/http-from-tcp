@@ -1,0 +1,9 @@
+- authorization: Bearer
+- content-type: text/plain
+- user-agent: PostmanRuntime/7.51.1
+- accept: */*
+- postman-token: 0ba02252-37ed-4bcc-918c-82f7a5aab76a
+- host: localhost:8000
+- accept-encoding: gzip,
+- connection: keep-alive
+- content-length: 54

@@ -22,8 +22,8 @@ make
 - or compile manually
 ```
 #windows
-gcc  -Iinclude src/*.c -o main -lws2_32
+gcc -Irequest  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app -lws2_32 
 #linux
-gcc -Iinclude src/*.c -o main
+gcc -Irequest  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app 
 
 ```

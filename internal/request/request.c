@@ -74,15 +74,49 @@ int parse(Request_t *req, char *data, int len){
 
     else if(req->state==requestStateParsingHeaders){
         if(lineLength == 0){
-            req->state =DONE;
+            req->state =parsingbody;
             return 2;
         }
         int  idx = req->num_headers++;
         Parse(req, idx, line);
         
     }
+    if(req->state == parsingbody){
+        // printf("%s\n", line);
+       char *name = Get(req, "content-length");
+       if(name =="nayyy"){
+            req->state = DONE;
+            printf("hello\n");
+       }else{
+
+        req->body = malloc(strlen(line)+1);
+        strcpy((char*)req->body, line);
+        // printf("%s\n",line);
+    
+        // printf("")
+          
+       }
+      
+    }
+    
 
     return lineLength+2;   
+}
+
+char *Get(Request_t *req, char* key){
+    
+    for (int i =0;i<10 && req->Headers[i].key !=NULL;i++){
+        // printf("%s\n", req->Headers[i].key);
+        if(strcmp(key, req->Headers[i].key)==0){
+            char *name  = req->Headers[i].value;
+            return name;
+        }
+        
+    }
+
+    return "nayyy";
+    // return "yess";
+    // printf("hello");
 }
 
 Request_t* RequestFromReader(ChunkReader_t *cr){   
@@ -94,12 +128,12 @@ Request_t* RequestFromReader(ChunkReader_t *cr){
 
    
    while(Req->state !=DONE){
+   
     char chunk[8];
     int n  = chunkReaderRead(cr, chunk, sizeof(chunk));
     
     if(n<=0 ){
-        free(Req);
-        return NULL;
+       break;
     }
  
 
@@ -121,9 +155,9 @@ Request_t* RequestFromReader(ChunkReader_t *cr){
 
    }
 
-   printf("%s\n", Req->RequestLine.Method);
+
    return  Req;    
 }
 
 
-// gcc -Irequest headers/headers.c request/request.c headers/headers_test.c -o main 
+// gcc -Irequest headers/headers.c request/request.c request/request_test.c -o main 
