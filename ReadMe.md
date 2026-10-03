@@ -11,7 +11,6 @@
 - Binary Data Handling.
 
 
-
 # Installation and Usage
 
 - install gcc compiler;
@@ -22,8 +21,8 @@ make
 - or compile manually
 ```
 #windows
-gcc -Irequest  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app -lws2_32 
+gcc -Iinclude  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app -lws2_32 
 #linux
-gcc -Irequest  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app 
+gcc -Iinclude  internal/request/request.c headers/headers.c cmd/tcp/main.c -o app 
 
 ```

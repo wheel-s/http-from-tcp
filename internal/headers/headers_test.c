@@ -1,22 +1,144 @@
 #include "../../include/request.h"
 #include "assert.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <munit.h>
+#include <assert.h>
+#include <stdbool.h>
 
 
-int main(){
-        
-     
-    char *data = "User-Agent: curl/8.16.0\r\n\r\n";
-    
-    Request_t *req = malloc(sizeof(req));
-    for(int i=0; i <4; i++){
-    
-       int p =  Parse(req, i,  data);
-       
+typedef struct testCase {
+    char*   name;
+    char *request;
+    char*   wantKey;
+    char*   wantValue;
+    int  wantRead;
+    parseStatus wantErr;
+} testCase;
+
+
+testCase testCases[] = {
+    {
+        .name = "Standard headers",
+        .request = "GET / HTTP/1.1\r\nHost: localhost:8000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\n", 
+        .wantKey = "host",
+        .wantValue = "localhost:8000",
+        .wantRead = 20,
+        .wantErr = HEADERS_DONE_PARSING
+    },
+    {
+        .name = "Duplicate headers",
+        .request = "GET / HTTP/1.1\r\nHost: localhost:8000\r\nHost: localhost:9000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\n", 
+        .wantKey = "user-agent",
+        .wantValue = "curl/7.81.0",
+        .wantRead = 20,
+        .wantErr = HEADERS_DONE_PARSING 
+    },
+     {
+        .name = "Invalid spacing",
+        .request = "GET / HTTP/1.1\r\nHost: localhost:8000\r\nHost: localhost:9000\r\nUser-Agent : curl/7.81.0\r\nAccept: */*\r\n\r\n", 
+        .wantKey = NULL,
+        .wantValue = NULL,
+        .wantRead = 1,
+        .wantErr = ERR_INVALID_FIELDNAME
+    },
+    {
+        .name = "Invalid character",
+        .request = "GET / HTTP/1.1\r\nHos@t: localhost:8000\r\nHost: localhost:9000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\n", 
+        .wantKey = NULL,
+        .wantValue = NULL,
+        .wantRead = 0,
+        .wantErr = ERR_INVALID_CHAR_IN_FIELDNAME 
+    },
+    {
+        .name = "Malformed headers",
+        .request = "GET / HTTP/1.1\r\nlocalhost:8000\r\nHost: localhost:9000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\n", 
+        .wantKey = NULL,
+        .wantValue = NULL,
+        .wantRead = 0,
+        .wantErr = ERR_BAD_HEADER_LINE
+    },
+
+
+
+};
+
+
+static MunitResult test (const MunitParameter params[], void* fixture) {
+
+    int size = sizeof(testCases) / sizeof(testCases[0]);
+
+    for(int i = 0; i < size; i++){
+        stringReader read = {
+            .data = testCases[i].request,
+            .totalLength = strlen(read.data),
+            .pos = 0
+        }; 
+        reqStatus r = RequestFromReader(&read);
+        if(testCases[i].wantKey != NULL){
+            munit_assert_string_equal(r.req->Headers.items[i].key, testCases[i].wantKey);
+            munit_assert_string_equal(r.req->Headers.items[i].value, testCases[i].wantValue);
+            munit_assert_int(r.status, ==, testCases[i].wantErr);
+
+        } else {
+            if(r.req !=NULL){
+                munit_assert_size(r.req->Headers.size, ==, testCases[i].wantRead);
+                munit_assert_int(r.status, ==, testCases[i].wantErr);
+            }
+        }
     }
-    printf("%s\n%s\n", req->Headers[0].key, req->Headers[0].value);
-    free(req);
-    return 0;
 
+    return MUNIT_OK;
 }
+
+
+//tests
+MunitTest tests[] = {
+    {
+        "/my-test\n",
+        test,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL,
+    },
+
+    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
+
+};
+
+
+//test suite
+static const MunitSuite suite = {
+    "/my-tests",
+    tests,
+    NULL,
+    1,
+    MUNIT_SUITE_OPTION_NONE
+
+};
+
+
+int main(int argc, char* argv[]){
+
+    printf("test parsing headers........\n");
+
+    stringReader read = {
+        .data = "GET / HTTP/1.1\r\nHost:  localhost:8000\r\nHost: localhost:9000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\nbody hello there!!", 
+        .totalLength = strlen(read.data),
+        .pos = 0,
+    };
+
+    reqStatus r = RequestFromReader(&read);
+    printf("key: %s\n", r.req->Headers.items[0].key);
+    printf("value: %s\n", r.req->Headers.items[0].value);
+    const char* stat = parse_error_str(r.status);
+    printf("%s\n", stat);
+    char* part1 = "User-Agent:";
+    char* part2 = "host";
+    bool ok = headers_getkey(&r.req->Headers, part2);
+    return 0;
+    // return munit_suite_main(&suite, NULL, argc, argv);
+}
+
+
+
+// gcc -Irequest internal/request/request.c internal/headers/headers.c internal/headers/headers_test.c -o hea -lws2_32 -lmunit
