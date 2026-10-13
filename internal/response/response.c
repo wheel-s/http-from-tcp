@@ -1,5 +1,4 @@
-#include "../../include/request.h"
-
+#include "server.h"
 
 
 void WriteStatusLine(SOCKET client_sock, statusCode status){
@@ -18,7 +17,7 @@ void WriteStatusLine(SOCKET client_sock, statusCode status){
             send(client_sock, response, strlen(response), 0);
             return;
         default:
-            char* response = "HTTP/1.1  %d\r\n",status;
+            char* response = "HTTP/1.1 \r\n";
             send(client_sock, response, strlen(response), 0);
             return;
     }
@@ -57,17 +56,16 @@ Headers_t GetDefaultHeaders(int contentLen){
         headers.items[i].key = strdup(resp[i].key);
         headers.items[i].value = strdup(resp[i].value);
     }
+    headers.size = 3;
     return headers;
 }
 
 int WriteHeaders(SOCKET client_sock, Headers_t headers){
     char line[512];
-    printf("%s\n", headers.items[0].value);
     for(int i = 0; i < 3; i++){
         int len = snprintf(line, sizeof(line), "%s: %s\r\n",
                 headers.items[i].key,
                 headers.items[i].value);
-        printf("%s\n", line);
         send(client_sock, line, len, 0);
     }
 
@@ -81,13 +79,4 @@ void WriteBody(SOCKET client_sock, Body *body){
     }
     return;
 }
-
-void WriteChunkedBody(){
-
-}
-
-void WriteChunkedBodyDone(){
-
-}
-
 

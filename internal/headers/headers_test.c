@@ -1,8 +1,5 @@
-#include "../../include/request.h"
-#include "assert.h"
+#include "request.h"
 #include <munit.h>
-#include <assert.h>
-#include <stdbool.h>
 
 
 typedef struct testCase {
@@ -22,7 +19,7 @@ testCase testCases[] = {
         .wantKey = "host",
         .wantValue = "localhost:8000",
         .wantRead = 20,
-        .wantErr = HEADERS_DONE_PARSING
+        .wantErr = PARSE_OK
     },
     {
         .name = "Duplicate headers",
@@ -30,7 +27,7 @@ testCase testCases[] = {
         .wantKey = "user-agent",
         .wantValue = "curl/7.81.0",
         .wantRead = 20,
-        .wantErr = HEADERS_DONE_PARSING 
+        .wantErr = PARSE_OK
     },
      {
         .name = "Invalid spacing",
@@ -118,27 +115,8 @@ static const MunitSuite suite = {
 
 
 int main(int argc, char* argv[]){
-
     printf("test parsing headers........\n");
 
-    stringReader read = {
-        .data = "GET / HTTP/1.1\r\nHost:  localhost:8000\r\nHost: localhost:9000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\nbody hello there!!", 
-        .totalLength = strlen(read.data),
-        .pos = 0,
-    };
-
-    reqStatus r = RequestFromReader(&read);
-    printf("key: %s\n", r.req->Headers.items[0].key);
-    printf("value: %s\n", r.req->Headers.items[0].value);
-    const char* stat = parse_error_str(r.status);
-    printf("%s\n", stat);
-    char* part1 = "User-Agent:";
-    char* part2 = "host";
-    bool ok = headers_getkey(&r.req->Headers, part2);
-    return 0;
-    // return munit_suite_main(&suite, NULL, argc, argv);
+    return munit_suite_main(&suite, NULL, argc, argv);
 }
 
-
-
-// gcc -Irequest internal/request/request.c internal/headers/headers.c internal/headers/headers_test.c -o hea -lws2_32 -lmunit

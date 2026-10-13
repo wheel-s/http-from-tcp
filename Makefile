@@ -1,40 +1,36 @@
-# CC = gcc 
-# CFLAGS = -Iinclude
-# TARGET = httpserver
-#
-# SRCS = cmd/tcp/main.c \
-# 		internal/request/request.c \
-# 		internal/headers/headers.c
-#
-# vpath %.c cmd/tcp/ internal/request internal/headers
-#
-# BUILD_DIR = build
-#
-# OBJS = $(addprefix $(BUILD_DIR)/, $(notdir $(SRCS:.c=.o)))
-#
-# all:$(TARGET)
-#
-# $(BUILD_DIR)/%.o: %.c
-# 	@mkdir -p $(BUILD_DIR)
-# 	$(CC) $(CFLAGS) -c $< -o $@
-#
-# $(TARGET): $(OBJS)
-# 	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) -lws2_32
-#
-#
-# TEST_SRC = internal/headers/headers.c \
-# 		   internal/request/request.c \
-# 		   internal/request/request_test.c
-#
-# TEST_OBJS = $(TEST_SRC:.c=.o)
-# TEST_TARGET = request_test
-#
-# test:$(TEST_OBJS)
-# 	$(CC) $(CFLAGS) $(TEST_OBJS) -o $(TEST_TARGET) -lws2_32
-# 	./$(TEST_TARGET)
-# debug:
-# 	@echo "files to be deleted: $(OBJS) $(TARGET) $(TEST_OBJS)"
-#
-# clean:
-# 	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_OBJS) $(TEST_TARGET)
-#
+CC = gcc 
+CFLAGS = -Iinclude -Wall -O2 -std=c99
+
+
+SOURCES = internal/headers/headers.c  internal/request/request.c
+HEADERS = include/request.h include/headers.h include/server.h
+
+OBJECTS = $(addprefix build/, $(notdir $(SOURCES:.c=.o)))
+
+HTTP = build/main.o build/server.o build/response.o 
+REQ_TEST = build/request_test.o
+HEADERS_TEST = build/headers_test.o
+
+vpath %.c internal/headers internal/request internal/server internal/response httpserver
+
+http: $(OBJECTS) $(HTTP)
+	$(CC) $(CFLAGS) -o $@ $^ -lws2_32
+
+req_test: $(OBJECTS) $(REQ_TEST)
+	$(CC) $(CFLAGS) -o $@ $^ -lws2_32 -lmunit
+
+headers_test: $(OBJECTS) $(HEADERS_TEST)
+	$(CC) $(CFLAGS) -o $@ $^ -lws2_32 -lmunit
+
+
+build/%.o: %.c $(HEADERS) | build
+	$(CC) $(CFLAGS) -c $< -o $@
+
+build:
+	mkdir -p build
+
+.PHONY: clean
+clean:
+	rm -f http http.exe req_test req_test.exe headers_test headers_test.exe $(OBJECTS) $(HTTP) $(REQ_TEST) $(HEADERS_TEST)
+
+

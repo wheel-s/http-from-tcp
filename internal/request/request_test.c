@@ -1,7 +1,5 @@
-#include "../../include/request.h"
+#include "request.h"
 #include <munit.h>
-#include <assert.h>
-#include <stdbool.h>
 
 
 typedef struct testCase {
@@ -21,7 +19,7 @@ testCase testCases[] = {
         .wantMethod = "GET",
         .wantVersion = "HTTP/1.1",
         .wantTarget = "/",
-        .wantErr = PARSE_OK
+        .wantErr = PARSE_OK 
     },
     {
         .name = "Test good requestline with path",
@@ -29,8 +27,7 @@ testCase testCases[] = {
         .wantMethod = "GET",
         .wantVersion = "HTTP/1.1",
         .wantTarget = "/coffee",
-        .wantErr = PARSE_OK
-    },
+        .wantErr = PARSE_OK },
     {
         .name = "Invalid method",
         .request = "Get /coffee HTTP/1.1\r\nHost: localhost:8000\r\nUser-Agent: curl/7.81.0\r\nAccept: */*\r\n\r\n",
@@ -74,7 +71,7 @@ static MunitResult test (const MunitParameter params[], void* fixture) {
             munit_assert_string_equal(r.req->RequestLine.method, testCases[i].wantMethod);
             munit_assert_string_equal(r.req->RequestLine.requestTarget, testCases[i].wantTarget);
             munit_assert_string_equal(r.req->RequestLine.httpVersion, testCases[i].wantVersion);
-            // munit_assert_int(r.status, ==, testCases[i].wantErr);
+            munit_assert_int(r.status, ==, testCases[i].wantErr);
         } else {
             munit_assert_int(r.status, ==, testCases[i].wantErr);
         }
@@ -115,19 +112,7 @@ static const MunitSuite suite = {
 int main(int argc, char* argv[]){
     printf("Starting test suite\n");
 
-    stringReader read = {
-        .data = "GET / HTTP/1.1\r\nHost: localhost:8000\r\nUser-Agent: curl/7.81.0\r\nContent-Length: 12\r\nAccept: */*\r\n\r\nhello server", 
-        .totalLength = strlen(read.data),
-        .pos = 0,
-    };
-    reqStatus r = RequestFromReader(&read);
-
-
-    return 0;
-    // return munit_suite_main(&suite, NULL, argc, argv);
+    return munit_suite_main(&suite, NULL, argc, argv);
 }
 
 
-
-
-// gcc -Irequest internal/headers/headers.c  internal/request/request.c internal/request/request_test.c -o nae -lmunit -lws2_32

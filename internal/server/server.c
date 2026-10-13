@@ -1,10 +1,4 @@
-#include "../../include/request.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
-
+#include "server.h"
 
 Server startServer(int port, Handler handler){
 
@@ -14,7 +8,7 @@ Server startServer(int port, Handler handler){
 
 
     if(WSAStartup(MAKEWORD(2,2), &wsa) !=0){
-        printf("Failed. Error Code %d\n", WSAGetLastError);
+        printf("Failed. Error Code %d\n", WSAGetLastError());
         return (Server) { server_socket,true};
     }
 
@@ -51,17 +45,17 @@ int Close(Server* s){
 void Listen(Server* s){
     if(!s){ return; }
 
-    SOCKET client_socket; 
+    SOCKET client_sock; 
     struct sockaddr_in client;
     int c;
 
     while(1){
-        SOCKET client_sock = accept(s->server_socket, (struct sockaddr *)&client_sock, &c);
+        client_sock = accept(s->server_socket, (struct sockaddr *)&client_sock, &c);
         if(client_sock == INVALID_SOCKET){
             if(s->closed == true){
                 return;
             }
-            printf("Error accepting new connection: %d", WSAGetLastError);
+            printf("Error accepting new connection: %d", WSAGetLastError());
             continue;
         }
 
@@ -70,6 +64,24 @@ void Listen(Server* s){
    }
 }
 
+void free_req(Request_t *req){
+
+    free(req->RequestLine.method);
+    free(req->RequestLine.requestTarget);
+    free(req->RequestLine.httpVersion);
+
+
+    for( int i = 0; i < req->Headers.size; i++) {
+        free(req->Headers.items[i].key);
+        free(req->Headers.items[i].value);
+    }
+    free(req->Headers.items);
+
+    free(req->body);
+
+    free(req);
+    return;
+}
 
 
 void handle(Server *s, SOCKET client_sock){
@@ -81,17 +93,17 @@ void handle(Server *s, SOCKET client_sock){
     Headers_t headers = GetDefaultHeaders(13);
     reqStatus r = RequestFromSocket(client_sock);
     const char* stat = parse_error_str(r.status);
+    printf("%s\n", stat);
 
     if(r.status != PARSE_OK){
-        WriteStatusLine(client_sock, HTTP_STATUS_400);
+        WriteStatusLine(client_sock, HTTP_STATUS_BAD_REQUEST);
         WriteHeaders(client_sock, headers);
+        free_req(r.req);
         return;
     }
 
     s->handler(client_sock, r.req);
-
-
-    // if(sent == SOCKET_ERROR){
-    //     printf("send failed with error: %d\n", WSAGetLastError());
-    // }
+    if(r.req != NULL){
+        free_req(r.req);
+    }
 }
